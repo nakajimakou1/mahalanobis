@@ -57,6 +57,11 @@ class Mahalanobis:
     >>> pred = model.pred(test)
 
     mahalanobis Outlier detection
+    >>> datas.shape
+    ((len(datas), n))
+    >>> model = Mahalanobis(datas)
+    >>> pred = model.pred(datas)
+    and set your own threshould.
 
     """
     
@@ -184,7 +189,7 @@ def ex2():
 def main():
    
     ex1()
-    
+
     plt.clf()
     ex2()
     
