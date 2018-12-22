@@ -1,6 +1,5 @@
 
 import numpy as np
-import numpy
 import tqdm
 
 import matplotlib.pyplot as plt
@@ -48,11 +47,27 @@ def getInverse(matrix):
 
     return inv_a
 
-class mahalanobis:
+class Mahalanobis:
+
+    """Mahalanobis
+    mahalanobis machine learning class
+    >>> train_datas.shape, train_targets.shape
+    ((lne(train_datas), n), (len(train_datas),))
+    >>> model = Mahalanobis(train_datas, train_targets)
+    >>> pred = model.pred(test)
+
+    mahalanobis Outlier detection
+
+    """
     
-    def __init__(self, _trains, _targets):
+    def __init__(self, _trains, _targets=None):
         print('# setup mahalanobis machine learning')
         self.trains = xp.array(_trains, dtype=xp.float64)
+        self.outlier = False
+        if _targets is None:
+            self.outlier = True
+            _targets = xp.zeros(len(_trains))
+            print('# Outliers detection mode...')
         self.targets = xp.array(_targets, dtype=xp.int32)
         self.calc_convariance_matrix()
 
@@ -89,11 +104,10 @@ class mahalanobis:
 
             self.inv_convariance_matrixs.append(inv_a)
 
-
     def pred(self, tests):
         print('start prediction')
         tests = xp.array(tests, dtype=xp.float64)
-        possibilities = []
+        dists = []
         for test in tqdm.tqdm(tests):
             distToClasses = []
             for c in range(self.classnum):
@@ -101,16 +115,13 @@ class mahalanobis:
                 dist = xp.dot(disttmp, test-self.mean_vec[c])
                 distToClasses.append(dist)
             
-            possibilities.append(distToClasses)
+            dists.append(distToClasses)
 
-        possibilities = xp.array(possibilities, dtype=xp.float64)
-        return possibilities
-
-
+        dists = xp.array(dists, dtype=xp.float64)
+        return dists
 
 
-def main():
-   
+def ex1():
 
     c1num = 100
     xc1 = np.random.randn(c1num) * 10 + 70
@@ -137,13 +148,13 @@ def main():
     plt.plot(xtest, ytest, 'k*', label='class 4')
     plt.xlim([0, 100])
     plt.ylim([0, 100])
-    plt.savefig('test.png')
+    plt.savefig('test_ex1.png')
 
     
     tests = np.array([xtest, ytest]).T
     print('tests.shape:', tests.shape)
 
-    myMah = mahalanobis(trains, targets)
+    myMah = Mahalanobis(trains, targets)
     print('# mahalanobis distance')
     print(myMah.pred(tests))
 
@@ -153,6 +164,30 @@ def main():
     myMah.inv_convariance_matrixs[2] = xp.array([[1.0 if i==j else 0.0 for i in range(2)] for j in range(2)], dtype=xp.float64)
     print(xp.sqrt(myMah.pred(tests)))
 
+
+def ex2():
+
+    c1num = 100
+    xc1 = np.random.randn(c1num) * 10 + 70
+    yc1 = np.random.randn(c1num) * 15 + 40
+    trains = np.r_[np.array([xc1, yc1]).T]
+
+    plt.plot(xc1, yc1, 'r.', label='class 0')
+    plt.xlim([0, 100])
+    plt.ylim([0, 100])
+    plt.savefig('test_ex2.png')
+    myMah = Mahalanobis(trains)
+
+    preds = myMah.pred(trains)
+    print(preds)
+
+def main():
+   
+    ex1()
+    
+    plt.clf()
+    ex2()
+    
 
 if __name__=='__main__':
     main()
